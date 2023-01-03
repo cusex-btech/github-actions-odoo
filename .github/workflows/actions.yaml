@@ -83,7 +83,7 @@ jobs:
       #     image-ref: 'febryandana/postgresql:15.1'
       #     format: 'table'
       #     exit-code: '0'
-      #     severity: 'MEDIUM,HIGH,CRITICAL'
+      #     severity: 'MEDIUM,HIGH,CRITICAL' 
 
   deploy-staging:
     name: Deploy Staging
