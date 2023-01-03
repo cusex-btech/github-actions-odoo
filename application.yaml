@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: odoo
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/febryandana/learn-github-actions1.git
+    targetRevision: HEAD
+    path: manifests
+  destination: 
+    server: https://kubernetes.default.svc
+    namespace: odoo
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+
+    automated:
+      selfHeal: true
+      prune: true
