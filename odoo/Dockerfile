@@ -76,7 +76,7 @@ VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 
 RUN chown odoo:odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /mnt/extra-addons \
-    && chown -R odoo:odoo /mnt/extra-addons/whatsapp_redirect
+    && chown -R odoo:odoo /mnt/extra-addons/whatsapp_redirect \
     && chown -R odoo:odoo /var/lib/odoo
 
 # Expose Odoo services
