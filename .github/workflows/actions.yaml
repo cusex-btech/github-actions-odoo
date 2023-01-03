@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  build_image:
+  build-image:
     name: Build Docker image and push to repositories
     runs-on: self-hosted
     steps:
