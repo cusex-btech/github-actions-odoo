@@ -71,9 +71,9 @@ COPY ./odoo.conf /etc/odoo/
 
 # Set permissions and Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
 RUN mkdir -p /mnt/extra-addons
-ADD ./whatsapp_redirect/ /mnt/extra-addons/
 VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 
+COPY ./whatsapp_redirect/ /mnt/extra-addons/
 RUN chown odoo:odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /mnt/extra-addons \
     && chown -R odoo:odoo /mnt/extra-addons/whatsapp_redirect \
