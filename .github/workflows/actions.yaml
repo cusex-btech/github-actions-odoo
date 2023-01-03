@@ -126,7 +126,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: manifests/production/odoo.yaml
-          destination_repo: rjhaikal/github-argo
+          destination_repo: cusex-btech/github-actions-odoo
           destination_branch: production
           destination_folder: manifests/production
           user_email: majidqoba52@gmail.com
