@@ -102,25 +102,25 @@ spec:
       #         name: odoo-addons
       containers:
         - name: odoo
-          image: rjhaikal/odoo:16
+          image: rjhaikal/odoo:v1.1.1-rc
           imagePullPolicy: Always
           ports:
             - containerPort: 8069
           envFrom:
             - configMapRef:
                 name: odoo-config
-      #     volumeMounts:
-      #       - mountPath: /var/lib/odoo
-      #         name: odoo-web
-      #       - mountPath: /mnt/extra-addons
-      #         name: odoo-addons
-      # volumes:
-      #   - name: odoo-web
-      #     persistentVolumeClaim:
-      #       claimName: odoo-web-data-claim
-      #   - name: odoo-addons
-      #     persistentVolumeClaim:
-      #       claimName: odoo-addons-data-claim
+                #     volumeMounts:
+                #       - mountPath: /var/lib/odoo
+                #         name: odoo-web
+                #       - mountPath: /mnt/extra-addons
+                #         name: odoo-addons
+                # volumes:
+                #   - name: odoo-web
+                #     persistentVolumeClaim:
+                #       claimName: odoo-web-data-claim
+                #   - name: odoo-addons
+                #     persistentVolumeClaim:
+                #       claimName: odoo-addons-data-claim
 # ---
 # apiVersion: v1
 # kind: Service
