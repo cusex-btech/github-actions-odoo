@@ -2,58 +2,77 @@ name: CI/CD Odoo
 
 on:
   push:
-    branches: [main]
-  pull_request:
+    tags:
+      - 'v*'
 
 jobs:
   build_image:
     name: Build Docker image and push to repositories
-    runs-on: ubuntu-latest
-
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Get Version
+        id: get-version
+        run: |
+          echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
+      - name: Create Image
+        run: |
+          echo ${{ secrets.HARBOR_PASSWORD }} | docker login  -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          cd odoo
+          docker build -t odoo:${{ steps.get-version.outputs.VERSION }}-rc .
+          echo 'Created Image with name:tag = odoo:${{ steps.get-version.outputs.VERSION }}-rc'
+
+      - name: get-images-id
+        id: image-id
+        run: |
+          echo ::set-output name=IMAGE_ID::$(docker images -q odoo:${{ steps.get-version.outputs.VERSION }}-rc)
+
+      - name: Push Images
+        run: |
+          # Staging Image
+          docker tag ${{ steps.image-id.outputs.IMAGE_ID }} rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc
+          docker push rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc
+          # Production Image
+          docker tag rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}
+          docker push rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}
+
+      - name: Update Manifest Yaml
+        run: |
+          cd manifests/staging
+          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
+          cat odoo.yaml
+
+      - name: Push Change Back to Github
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          username: ${{ secrets.DOCKERHUB_USER_FEBRY }}
-          password: ${{ secrets.DOCKERHUB_TOKEN_FEBRY }}
-      
-      - name: Build Odoo image and push to Docker Hub
-        uses: docker/build-push-action@v2
-        with:
-          context: ./odoo
-          tags: |
-            febryandana/odoo:16
-            febryandana/odoo:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
+          source_file: manifests/staging/odoo.yaml
+          destination_repo: cusex-btech/github-actions-odoo
+          destination_branch: staging
+          destination_folder: manifests/staging
+          user_email: majidqoba52@gmail.com
+          user_name: rjhaikal
+          commit_message: update image version ${{ steps.get-version.outputs.VERSION }} in yaml file
+  
 
-      # - name: Build Postgresql image and push to Docker Hub
-      #   uses: docker/build-push-action@v2
-      #   with:
-      #     context: ./odoo
-      #     tags: |
-      #       febryandana/postgresql:15.1
-      #       febryandana/postgresql:latest
-      #     push: ${{ github.ref == 'refs/heads/main' }}
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
-
-  scan_image:
+  image-scanning:
     name: Scan image vulnerability
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build_image
     steps:
+      - name: get version
+        id: get-version
+        run: |
+          echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+
       - name: Scan Odoo image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'febryandana/odoo:16'
+          image-ref: 'rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc'
           format: 'table'
           exit-code: '0'
           severity: 'MEDIUM,HIGH,CRITICAL'
@@ -65,15 +84,59 @@ jobs:
       #     format: 'table'
       #     exit-code: '0'
       #     severity: 'MEDIUM,HIGH,CRITICAL'
-  
-  deploy_argo:
-    name: Deploy apps to ArgoCD
+
+  deploy-staging:
+    name: Deploy Staging
+    needs: [build-image, image-scanning]
     runs-on: self-hosted
-    needs: [build_image, scan_image]
+    environment:
+      name: Staging
     steps:
       - name: ArgoCD Deploy to Staging
         run: |
-          argocd login --insecure  ${{ secrets.ARGOCD_SERVER }} --username  ${{ secrets.ARGOCD_USER }} --password  ${{ secrets.ARGOCD_PASS}}
-          argocd app create odoo --project default --repo https://github.com/cusex-btech/github-actions-odoo.git --path ./manifests --dest-namespace odoo --dest-server https://kubernetes.default.svc --upsert
-          argocd --grpc-web app sync odoo --force
-          argocd --grpc-web app wait odoo --timeout 600
+          argocd login --insecure  ${{ secrets.ARGOCD_SERVER }} --username  ${{ secrets.ARGOCD_CREDS_USR }} --password  ${{ secrets.ARGOCD_CREDS_PSW}}
+          argocd app create odoo-staging --project default --repo https://github.com/cusex-btech/github-actions-odoo.git --revision staging --path ./manifests/staging --dest-namespace odoo-stg --dest-server https://kubernetes.default.svc --upsert
+          argocd --grpc-web app sync odoo-staging --force 
+          argocd --grpc-web app wait odoo-staging --timeout 600
+
+  deploy-production:
+    name: Deploy Production
+    needs: [build-image, image-scanning, deploy-staging]
+    runs-on: self-hosted
+    environment:
+      name: Production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: get version
+        id: get-version
+        run: |
+          echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+
+      - name: Update Manifest Yaml
+        run: |
+          cd manifests/production
+          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
+          cat odoo.yaml
+
+      - name: Push Change Back to Github
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source_file: manifests/production/odoo.yaml
+          destination_repo: rjhaikal/github-argo
+          destination_branch: production
+          destination_folder: manifests/production
+          user_email: majidqoba52@gmail.com
+          user_name: rjhaikal
+          commit_message: update image version ${{ steps.get_version.outputs.VERSION }} in yaml file
+
+      - name: ArgoCD Deploy to Production
+        run: |
+          echo ${{ secrets.HARBOR_PASSWORD }} | docker login  -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          argocd login --insecure  ${{ secrets.ARGOCD_SERVER }} --username  ${{ secrets.ARGOCD_CREDS_USR }} --password  ${{ secrets.ARGOCD_CREDS_PSW}}
+          argocd app create odoo-prod --project default --repo https://github.com/cusex-btech/github-actions-odoo.git --revision production --path ./manifests/production --dest-namespace odoo --dest-server https://kubernetes.default.svc --upsert
+          argocd --grpc-web app sync odoo-prod --force 
+          argocd --grpc-web app wait odoo-prod --timeout 600
