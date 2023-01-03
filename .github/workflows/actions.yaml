@@ -62,7 +62,7 @@ jobs:
   image-scanning:
     name: Scan image vulnerability
     runs-on: self-hosted
-    needs: build_image
+    needs: build-image
     steps:
       - name: get version
         id: get-version
