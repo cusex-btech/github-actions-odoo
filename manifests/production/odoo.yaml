@@ -33,7 +33,7 @@
 # kind: PersistentVolumeClaim
 # metadata:
 #   name: odoo-web-data-claim
-#   namespace: odoo
+#   namespace: odoo-prod
 # spec:
 #   volumeName: odoo-web-data
 #   storageClassName: manual
@@ -47,7 +47,7 @@
 # kind: PersistentVolumeClaim
 # metadata:
 #   name: odoo-addons-data-claim
-#   namespace: odoo
+#   namespace: odoo-prod
 # spec:
 #   volumeName: odoo-addons-data
 #   storageClassName: manual
@@ -61,9 +61,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: odoo-config
-  namespace: odoo
+  namespace: odoo-prod
   labels:
-    app: odoo
+    app: odoo-prod
 data:
   HOST: postgres
   PORT: "5432"
@@ -74,18 +74,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: odoo
-  namespace: odoo
+  namespace: odoo-prod
   labels:
-    app: odoo
+    app: odoo-prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: odoo
+      app: odoo-prod
   template:
     metadata:
       labels:
-        app: odoo
+        app: odoo-prod
     spec:
       # securityContext:
       #   runAsUser: 101
@@ -126,12 +126,12 @@ apiVersion: v1
 kind: Service
 metadata:    
   name: odoo
-  namespace: odoo
+  namespace: odoo-prod
 spec:
   # clusterIP: 10.233.70.52
   type: LoadBalancer
   selector:
-    app: odoo
+    app: odoo-prod
   ports:
     - protocol: TCP
       port: 8069

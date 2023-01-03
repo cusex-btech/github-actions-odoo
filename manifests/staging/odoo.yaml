@@ -63,7 +63,7 @@ metadata:
   name: odoo-config
   namespace: odoo-stg
   labels:
-    app: odoo
+    app: odoo-stg
 data:
   HOST: postgres
   PORT: "5432"
@@ -76,16 +76,16 @@ metadata:
   name: odoo
   namespace: odoo-stg
   labels:
-    app: odoo
+    app: odoo-stg
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: odoo
+      app: odoo-stg
   template:
     metadata:
       labels:
-        app: odoo
+        app: odoo-stg
     spec:
       # securityContext:
       #   runAsUser: 101
@@ -131,7 +131,7 @@ spec:
   # clusterIP: 10.233.70.52
   type: LoadBalancer
   selector:
-    app: odoo
+    app: odoo-stg
   ports:
     - protocol: TCP
       port: 8069

@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: postgres-config
+  name: postgres-config-stg
   namespace: odoo-stg
   labels:
-    app: postgres
+    app: postgres-stg
 data:
   POSTGRES_DB: odoodb
   POSTGRES_USER: root
@@ -14,7 +14,7 @@ data:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: postgresql-data
+  name: postgresql-data-stg
   labels:
     type: local
 spec:
@@ -24,15 +24,15 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: "/data/volumes/postgresql-data"
+    path: "/data/volumes/postgresql-data-stg"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgresql-data-claim
+  name: postgresql-data-stg-claim
   namespace: odoo-stg
 spec:
-  volumeName: postgresql-data
+  volumeName: postgresql-data-stg
   storageClassName: manual
   accessModes:
     - ReadWriteMany
@@ -49,11 +49,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: postgres-stg
   template:
     metadata:
       labels:
-        app: postgres
+        app: postgres-stg
     spec:
       containers:
         - name: postgres
@@ -62,14 +62,14 @@ spec:
             - containerPort: 5432
           envFrom:
             - configMapRef:
-                name: postgres-config
+                name: postgres-config-stg
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: postgredb
       volumes:
         - name: postgredb
           persistentVolumeClaim:
-            claimName: postgresql-data-claim
+            claimName: postgresql-data-stg-claim
 ---
 apiVersion: v1
 kind: Service
@@ -77,12 +77,12 @@ metadata:
   name: postgres
   namespace: odoo-stg
   labels:
-    app: postgres
+    app: postgres-stg
 spec:
   # clusterIP: 10.233.70.51
   type: NodePort
   selector:
-    app: postgres
+    app: postgres-stg
   ports:
     - protocol: TCP
       port: 5432
