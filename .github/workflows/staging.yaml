@@ -46,13 +46,13 @@ jobs:
       - name: Update Staging Manifest Yaml
         run: |
           cd manifests/staging
-          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
           cat odoo.yaml
       
       - name: Update Production Manifest Yaml
         run: |
           cd manifests/production
-          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
           cat odoo.yaml
 
       - name: Push Change Back to Github Staging Branch
@@ -80,7 +80,7 @@ jobs:
       - name: Scan Staging Odoo image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc'
+          image-ref: 'rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc'
           format: 'table'
           exit-code: '0'
           severity: 'MEDIUM,HIGH,CRITICAL'
@@ -101,7 +101,7 @@ jobs:
 
   create-pr-prod:
     name: Create Pull Request to Production
-    needs:  [deploy-staging]
+    needs:  deploy-staging
     runs-on: ubuntu-latest
     environment:
       name: Staging

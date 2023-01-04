@@ -16,7 +16,7 @@ jobs:
 
   deploy-production:
     name: Deploy Production
-    needs: [if-merged]
+    needs: if-merged
     runs-on: self-hosted
     environment:
       name: Production
