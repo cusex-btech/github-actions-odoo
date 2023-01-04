@@ -1,4 +1,4 @@
-name: Staging Deployment
+name: CI/CD Odoo Staging
 
 on:
   push:
@@ -12,47 +12,44 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          ref: staging
 
       - name: Get Version
         id: get-version
         run: |
           echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
-
       - name: Create Image
         run: |
           echo ${{ secrets.HARBOR_PASSWORD }} | docker login  -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
           cd odoo
           docker build -t odoo:${{ steps.get-version.outputs.VERSION }}-rc .
           echo 'Created Image with name:tag = odoo:${{ steps.get-version.outputs.VERSION }}-rc'
-
       - name: get-images-id
         id: image-id
         run: |
           echo ::set-output name=IMAGE_ID::$(docker images -q odoo:${{ steps.get-version.outputs.VERSION }}-rc)
-
       - name: Push Images
         run: |
           # Staging Image
           echo Push image for Staging
-          docker tag ${{ steps.image-id.outputs.IMAGE_ID }} rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc
-          docker push rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc
+          docker tag ${{ steps.image-id.outputs.IMAGE_ID }} rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
+          docker push rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
           # Production Image
           echo Push image for Production
-          docker tag rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}
-          docker push rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}
-
+          docker tag rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}
+          docker push rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}
       - name: Update Staging Manifest Yaml
         run: |
           cd manifests/staging
-          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
           cat odoo.yaml
       
       - name: Update Production Manifest Yaml
         run: |
           cd manifests/production
-          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
           cat odoo.yaml
-
       - name: Push Change Back to Github Staging Branch
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
@@ -74,11 +71,10 @@ jobs:
         id: get-version
         run: |
           echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
-
       - name: Scan Staging Odoo image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc'
+          image-ref: 'rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc'
           format: 'table'
           exit-code: '0'
           severity: 'MEDIUM,HIGH,CRITICAL'
@@ -96,32 +92,36 @@ jobs:
           argocd app create odoo-staging --project default --repo https://github.com/cusex-btech/github-actions-odoo.git --revision staging --path ./manifests/staging --dest-namespace odoo-stg --dest-server https://kubernetes.default.svc --upsert
           argocd --grpc-web app sync odoo-staging --force
           argocd --grpc-web app wait odoo-staging --timeout 600
+  create-pr-prod:
+    name: Create Pull Request to Production
+    needs:  [deploy-staging]
+    runs-on: ubuntu-latest
+    environment:
+      name: Staging
+    steps:
+      - name: Checkout staging branch
+        uses: actions/checkout@v3
+        with:
+          ref: staging
+      - name: Create pull request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "staging"
+          destination_branch: "production"
+          pr_title: "Merge for Production branch"
+          pr_body: "Merge for Production branch"
+          pr_label: "automated-pr,merge-to-prod"
+          pr_allow_empty: true 
+          github_token: ${{ secrets.API_TOKEN_GITHUB }}
 
-  # create-pr-prod:
-  #   name: Create Pull Request to Production
-  #   needs:  deploy-staging
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout staging branch
-  #       uses: actions/checkout@v3
-  #       with:
-  #         ref: staging
-
-  #     - name: Create pull request to production
-  #       id: cpr
-  #       uses: peter-evans/create-pull-request@v4
-  #       with:
-  #         token: ${{ secrets.API_TOKEN_GITHUB_FEBRY }}
-  #         commit-message: Request Merge for Production branch
-  #         title: Request Merge for Production branch
-  #         body: Request Merge for Production branch
-  #         base: staging
-  #         labels: automated-pr, merge-to-prod
-  #         branch: production
-
-  #     - name: Check outputs
-  #       if: ${{ steps.cpr.outputs.pull-request-number }}
-  #       run: |
-  #         echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-  #         echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
-  #         echo "Pull Request Operation - ${{ steps.cpr.outputs.pull-request-operation }}"
+      # - name: Create pull request
+      #   uses: peter-evans/create-pull-request@v3.10.1
+      #   with:
+      #     token: ${{ secrets.API_TOKEN_GITHUB }}
+      #     commit-message: Merge for Production branch
+      #     title: Merge for Production branch
+      #     body: Merge for Production branch
+      #     base: production
+      #     labels: automated-pr, merge-to-prod
+      #     branch: staging
+      #     delete-branch: false
