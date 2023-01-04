@@ -1,4 +1,4 @@
-name: CI/CD Odoo Production
+name: Production Deployment
 
 on:
   pull_request:
