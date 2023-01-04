@@ -140,3 +140,4 @@ jobs:
           botToken: ${{ secrets.TELE_BOT_TOKEN }}
           chatId: ${{ secrets.TELE_CHAT_ID }}
           jobStatus: ${{ job.status }}
+          skipSuccess: false
