@@ -116,7 +116,7 @@ jobs:
           commit-message: Merge for Production branch
           title: Merge for Production branch
           body: Merge for Production branch
-          base: staging
+          base: production
           labels: automated-pr, merge-to-prod
-          branch: production
+          branch: staging
           delete-branch: false
