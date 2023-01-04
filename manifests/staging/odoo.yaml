@@ -102,7 +102,7 @@ spec:
       #         name: odoo-addons
       containers:
         - name: odoo
-          image: rjhaikal/odoo:v1.1.6-rc
+          image: rjhaikal/odoo:16v1.1.6-rc
           imagePullPolicy: Always
           ports:
             - containerPort: 8069
