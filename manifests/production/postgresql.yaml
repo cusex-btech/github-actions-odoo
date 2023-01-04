@@ -22,7 +22,7 @@ spec:
   capacity:
     storage: 5Gi
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   hostPath:
     path: "/data/volumes/postgresql-data-prod"
 ---
@@ -35,7 +35,7 @@ spec:
   volumeName: postgresql-data-prod
   storageClassName: manual
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
