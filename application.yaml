@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/febryandana/learn-github-actions1.git
+    repoURL: https://github.com/cusex-btech/github-actions-odoo.git
     targetRevision: HEAD
     path: manifests
   destination: 
