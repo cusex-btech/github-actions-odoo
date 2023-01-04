@@ -132,3 +132,11 @@ jobs:
       #     labels: automated-pr, merge-to-prod
       #     branch: staging
       #     delete-branch: false
+
+      - name: Telegram Notification
+        if: cancelled() == false
+        uses: xinthink/action-telegram@v1.1
+        with:
+          botToken: ${{ secrets.TELE_BOT_TOKEN }}
+          chatId: ${{ secrets.TELE_CHAT_ID }}
+          jobStatus: ${{ job.status }}
