@@ -63,7 +63,6 @@ jobs:
           source_file: manifests
           destination_repo: cusex-btech/github-actions-odoo
           destination_branch: staging
-          destination_folder: manifests
           user_email: majidqoba52@gmail.com
           user_name: rjhaikal
           commit_message: Update k8s manifest image version to ${{ steps.get-version.outputs.VERSION }}
