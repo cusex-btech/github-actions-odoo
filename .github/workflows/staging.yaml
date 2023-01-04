@@ -103,8 +103,6 @@ jobs:
     name: Create Pull Request to Production
     needs:  deploy-staging
     runs-on: ubuntu-latest
-    environment:
-      name: Staging
     steps:
       - name: Checkout staging branch
         uses: actions/checkout@v3
