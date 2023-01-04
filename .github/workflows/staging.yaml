@@ -111,13 +111,24 @@ jobs:
         with:
           ref: staging
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v3.10.1
+        uses: repo-sync/pull-request@v2
         with:
-          token: ${{ secrets.API_TOKEN_GITHUB }}
-          commit-message: Merge for Production branch
-          title: Merge for Production branch
-          body: Merge for Production branch
-          base: production
-          labels: automated-pr, merge-to-prod
-          branch: staging
-          delete-branch: false
+          source_branch: "staging"
+          destination_branch: "production"
+          pr_title: "Merge for Production branch"
+          pr_body: "Merge for Production branch"
+          pr_label: "automated-pr,merge-to-prod"
+          pr_allow_empty: true 
+          github_token: ${{ secrets.API_TOKEN_GITHUB }}
+
+      # - name: Create pull request
+      #   uses: peter-evans/create-pull-request@v3.10.1
+      #   with:
+      #     token: ${{ secrets.API_TOKEN_GITHUB }}
+      #     commit-message: Merge for Production branch
+      #     title: Merge for Production branch
+      #     body: Merge for Production branch
+      #     base: production
+      #     labels: automated-pr, merge-to-prod
+      #     branch: staging
+      #     delete-branch: false
