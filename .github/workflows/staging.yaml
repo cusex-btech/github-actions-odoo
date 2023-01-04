@@ -46,13 +46,13 @@ jobs:
       - name: Update Staging Manifest Yaml
         run: |
           cd manifests/staging
-          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
           cat odoo.yaml
       
       - name: Update Production Manifest Yaml
         run: |
           cd manifests/production
-          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
           cat odoo.yaml
 
       - name: Push Change Back to Github Staging Branch
