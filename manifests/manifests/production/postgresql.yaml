@@ -1,0 +1,90 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config-prod
+  namespace: odoo-prod
+  labels:
+    app: postgres-prod
+data:
+  POSTGRES_DB: odoodb
+  POSTGRES_USER: root
+  POSTGRES_PASSWORD: gladiators88
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgresql-data-prod
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/volumes/postgresql-data-prod"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-data-prod-claim
+  namespace: odoo-prod
+spec:
+  volumeName: postgresql-data-prod
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: odoo-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-prod
+  template:
+    metadata:
+      labels:
+        app: postgres-prod
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15.1-bullseye
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config-prod
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: postgresql-data-prod-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: odoo-prod
+  labels:
+    app: postgres-prod
+spec:
+  # clusterIP: 10.233.70.51
+  type: NodePort
+  selector:
+    app: postgres-prod
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+

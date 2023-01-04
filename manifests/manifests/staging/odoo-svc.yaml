@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:    
+  name: odoo
+  namespace: odoo-stg
+spec:
+  # clusterIP: 10.233.70.52
+  type: LoadBalancer
+  selector:
+    app: odoo-stg
+  ports:
+    - protocol: TCP
+      port: 8069
+      targetPort: 8069
