@@ -81,7 +81,7 @@ jobs:
       - name: Scan Staging Odoo image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}-rc'
+          image-ref: 'rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc'
           format: 'table'
           exit-code: '0'
           severity: 'MEDIUM,HIGH,CRITICAL'
