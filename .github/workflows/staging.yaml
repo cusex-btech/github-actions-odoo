@@ -40,7 +40,7 @@ jobs:
           docker push rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc
           # Production Image
           echo Push image for Production
-          docker tag rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc rjhaikal/odoo:${{ steps.get-version.outputs.VERSION }}
+          docker tag rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}-rc rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}
           docker push rjhaikal/odoo:16${{ steps.get-version.outputs.VERSION }}
 
       - name: Update Staging Manifest Yaml
