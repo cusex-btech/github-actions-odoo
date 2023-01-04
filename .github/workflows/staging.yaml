@@ -111,8 +111,9 @@ jobs:
         with:
           ref: staging
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v3.10.1
         with:
+          token: ${{ secrets.API_TOKEN_GITHUB }}
           commit-message: Merge for Production branch
           title: Merge for Production branch
           body: Merge for Production branch
