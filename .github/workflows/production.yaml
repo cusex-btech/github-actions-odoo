@@ -34,3 +34,12 @@ jobs:
           argocd app create odoo-prod --project default --repo https://github.com/cusex-btech/github-actions-odoo.git --revision production --path ./manifests/production --dest-namespace odoo --dest-server https://kubernetes.default.svc --upsert
           argocd --grpc-web app sync odoo-prod --force
           argocd --grpc-web app wait odoo-prod --timeout 600
+
+      - name: Telegram Notification
+        if: cancelled() == false
+        uses: xinthink/action-telegram@v1.1
+        with:
+          botToken: ${{ secrets.TELE_BOT_TOKEN }}
+          chatId: ${{ secrets.TELE_CHAT_ID }}
+          jobStatus: ${{ job.status }}
+          skipSuccess: false
