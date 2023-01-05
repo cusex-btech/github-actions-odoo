@@ -35,6 +35,13 @@ jobs:
           argocd --grpc-web app sync odoo-prod --force
           argocd --grpc-web app wait odoo-prod --timeout 600
 
+  notify-pipeline-status:
+    name: Notify After Deployment
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: Staging
+    steps:
       - name: Telegram Notification
         if: cancelled() == false
         uses: xinthink/action-telegram@v1.1

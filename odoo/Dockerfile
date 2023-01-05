@@ -73,6 +73,7 @@ COPY ./odoo.conf /etc/odoo/
 RUN mkdir -p /mnt/extra-addons
 VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 
+COPY ./addons/ /mnt/extra-addons/
 RUN chown odoo:odoo /etc/odoo/odoo.conf \
     && chown -R odoo:odoo /mnt/extra-addons \
     && chown -R odoo:odoo /var/lib/odoo
@@ -90,4 +91,4 @@ RUN chmod +x /usr/local/bin/wait-for-psql.py
 USER odoo
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["odoo", "-i base"]
+CMD ["odoo"]
