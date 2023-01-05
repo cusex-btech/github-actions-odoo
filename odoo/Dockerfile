@@ -91,8 +91,8 @@ RUN chmod +x /usr/local/bin/wait-for-psql.py
 USER odoo
 
 # Initialize database
-RUN odoo -i base -d odoodb --without-demo=all --stop-after-init
+#RUN odoo -i base -d odoodb --without-demo=all --stop-after-init
 
 # Run odoo server
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["odoo"]
+CMD ["odoo", "-i base", "--without-demo=all", "--stop-after-init"]
