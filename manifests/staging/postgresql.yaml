@@ -23,6 +23,7 @@ spec:
     storage: 5Gi
   accessModes:
     - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: "/data/volumes/postgresql-data-stg"
 ---
