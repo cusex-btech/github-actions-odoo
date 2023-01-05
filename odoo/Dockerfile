@@ -90,5 +90,9 @@ RUN chmod +x /usr/local/bin/wait-for-psql.py
 # Set default user when running the container
 USER odoo
 
+# Initialize database
+RUN odoo -i base -d odoodb --without-demo=all --stop-after-init
+
+# Run odoo server
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["odoo"]
