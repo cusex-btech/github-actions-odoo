@@ -146,12 +146,6 @@ jobs:
           pr_allow_empty: true 
           github_token: ${{ secrets.API_TOKEN_GITHUB }}
 
-  notify-pipeline-status:
-    name: Notify After Deployment
-    runs-on: ubuntu-latest
-    environment:
-      name: Staging
-    steps:
       - name: Telegram Notification
         if: cancelled() == false
         uses: xinthink/action-telegram@v1.1
