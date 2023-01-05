@@ -148,7 +148,6 @@ jobs:
 
   notify-pipeline-status:
     name: Notify After Deployment
-    needs: deploy-staging
     runs-on: ubuntu-latest
     environment:
       name: Staging

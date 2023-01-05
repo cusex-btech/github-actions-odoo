@@ -95,4 +95,4 @@ USER odoo
 
 # Run odoo server
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["odoo", "-i base", "--without-demo=all", "--stop-after-init"]
+#CMD ["odoo", "-i base", "--without-demo=all", "--stop-after-init"]
