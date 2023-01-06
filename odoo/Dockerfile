@@ -8,7 +8,7 @@ SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 ENV LANG C.UTF-8
 
 RUN touch /img-version.txt \
-    && echo "ini Odoo 16 v1.1.24" >> /img-version.txt \
+    && echo "ini Odoo 16 v1.2.1" >> /img-version.txt \
     && cat /img-version.txt
 
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
