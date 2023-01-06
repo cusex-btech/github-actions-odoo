@@ -12,7 +12,7 @@ spec:
     - host: cx-odoo.btech.id
       http:
         paths:
-          - path: /
+          - path: /web
             pathType: Prefix
             backend:
               service:
