@@ -39,7 +39,7 @@ spec:
               name: odoo-addons
       containers:
         - name: odoo
-          image: rjhaikal/odoo:16-v1.1.25-rc
+          image: harbor.febry.local/cusex/odoo:16-v1.2.1-rc
           imagePullPolicy: Always
           ports:
             - containerPort: 8069
@@ -51,6 +51,8 @@ spec:
               name: odoo-web
             - mountPath: /mnt/extra-addons
               name: odoo-addons
+      imagePullSecrets:
+        - name: regcred
       volumes:
         - name: odoo-web
           persistentVolumeClaim:

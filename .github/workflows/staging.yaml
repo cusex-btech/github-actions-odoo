@@ -30,6 +30,20 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.qualitygate.wait=false
 
+      # - name: SonarQube Quality Gate check
+      #   id: sonarqube-quality-gate-check
+      #   uses: sonarsource/sonarqube-quality-gate-action@master
+      #   # Force to fail step after specific time.
+      #   timeout-minutes: 5
+      #   env:
+      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #    SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #OPTIONAL
+
+      # # Optionally you can use the output from the Quality Gate in another step.
+      # # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
+      # - name: "Example show SonarQube Quality Gate Status value"
+      #   run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+
       - name: Telegram Notification
         if: ${{ failure() }}
         uses: xinthink/action-telegram@v1.1
@@ -41,7 +55,7 @@ jobs:
 
   build-image:
     name: Build Docker image and push to repositories
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: scan-code
     steps:
       - name: Checkout code
@@ -56,7 +70,7 @@ jobs:
       
       - name: Create Image
         run: |
-          echo ${{ secrets.HARBOR_PASSWORD }} | docker login  -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
+          echo ${{ secrets.HARBOR_PASSWORD }} | docker login ${{ secrets.HARBOR_URL }} -u ${{ secrets.HARBOR_USERNAME }} --password-stdin
           cd odoo
           docker build -t odoo:${{ steps.get-version.outputs.VERSION }}-rc .
           echo 'Created Image with name:tag = odoo:${{ steps.get-version.outputs.VERSION }}-rc'
@@ -70,23 +84,23 @@ jobs:
         run: |
           # Staging Image
           echo Push image for Staging
-          docker tag ${{ steps.image-id.outputs.IMAGE_ID }} rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
-          docker push rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
+          docker tag ${{ steps.image-id.outputs.IMAGE_ID }} harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
+          docker push harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
           # Production Image
           echo Push image for Production
-          docker tag rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}
-          docker push rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}
+          docker tag harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}
+          docker push harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}
       
       - name: Update Staging Manifest Yaml
         run: |
           cd manifests/staging
-          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
           cat odoo.yaml
       
       - name: Update Production Manifest Yaml
         run: |
           cd manifests/production
-          yq e -i '.spec.template.spec.containers[0].image="rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
           cat odoo.yaml
       
       - name: Push Change Back to Github Staging Branch
@@ -112,7 +126,7 @@ jobs:
 
   scan-image:
     name: Scan Image Vulnerability
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-image
     steps:
       - name: get version
@@ -123,7 +137,7 @@ jobs:
       - name: Scan Staging Odoo image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'rjhaikal/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc'
+          image-ref: 'harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc'
           format: 'table'
           exit-code: '0'
           severity: 'MEDIUM,HIGH,CRITICAL'
