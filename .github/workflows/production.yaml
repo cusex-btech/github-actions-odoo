@@ -15,6 +15,15 @@ jobs:
     - run: |
         echo The Staging PR was merged into Production
 
+    - name: Telegram Notification
+      if: ${{ failure() }}
+      uses: xinthink/action-telegram@v1.1
+      with:
+        botToken: ${{ secrets.TELE_BOT_TOKEN }}
+        chatId: ${{ secrets.TELE_CHAT_ID }}
+        jobStatus: ${{ job.status }}
+        skipSuccess: true
+
   deploy-production:
     name: Deploy Production
     needs: if-merged

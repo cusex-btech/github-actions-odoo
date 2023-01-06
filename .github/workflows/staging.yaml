@@ -15,6 +15,7 @@ jobs:
         with:
           ref: staging
           fetch-depth: 0
+
       - name: Scan code with SonarQube
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -28,6 +29,15 @@ jobs:
             -Dsonar.language=python
             -Dsonar.verbose=true
             -Dsonar.qualitygate.wait=false
+            
+      - name: Telegram Notification
+        if: ${{ failure() }}
+        uses: xinthink/action-telegram@v1.1
+        with:
+          botToken: ${{ secrets.TELE_BOT_TOKEN }}
+          chatId: ${{ secrets.TELE_CHAT_ID }}
+          jobStatus: ${{ job.status }}
+          skipSuccess: true
 
   build-image:
     name: Build Docker image and push to repositories
@@ -90,7 +100,16 @@ jobs:
           user_email: majidqoba52@gmail.com
           user_name: rjhaikal
           commit_message: Update k8s manifest image version to ${{ steps.get-version.outputs.VERSION }}
-  
+
+      - name: Telegram Notification
+        if: ${{ failure() }}
+        uses: xinthink/action-telegram@v1.1
+        with:
+          botToken: ${{ secrets.TELE_BOT_TOKEN }}
+          chatId: ${{ secrets.TELE_CHAT_ID }}
+          jobStatus: ${{ job.status }}
+          skipSuccess: true
+
   scan-image:
     name: Scan Image Vulnerability
     runs-on: ubuntu-latest
@@ -109,6 +128,15 @@ jobs:
           exit-code: '0'
           severity: 'MEDIUM,HIGH,CRITICAL'
 
+      - name: Telegram Notification
+        if: ${{ failure() }}
+        uses: xinthink/action-telegram@v1.1
+        with:
+          botToken: ${{ secrets.TELE_BOT_TOKEN }}
+          chatId: ${{ secrets.TELE_CHAT_ID }}
+          jobStatus: ${{ job.status }}
+          skipSuccess: true
+
   deploy-staging:
     name: Deploy Staging
     needs: [build-image, scan-image]
@@ -122,7 +150,16 @@ jobs:
           argocd app create odoo-staging --project default --repo https://github.com/cusex-btech/github-actions-odoo.git --revision staging --path ./manifests/staging --dest-namespace odoo-stg --dest-server https://kubernetes.default.svc --upsert
           argocd --grpc-web app sync odoo-staging --force
           argocd --grpc-web app wait odoo-staging --timeout 600
-  
+
+      - name: Telegram Notification
+        if: ${{ failure() }}
+        uses: xinthink/action-telegram@v1.1
+        with:
+          botToken: ${{ secrets.TELE_BOT_TOKEN }}
+          chatId: ${{ secrets.TELE_CHAT_ID }}
+          jobStatus: ${{ job.status }}
+          skipSuccess: true
+
   create-pr-to-prod:
     name: Create Pull Request to Production
     needs: deploy-staging
