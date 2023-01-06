@@ -5,7 +5,6 @@ metadata:
   name: odoo
   namespace: odoo-prod
 spec:
-  # clusterIP: 10.233.70.52
   type: LoadBalancer
   selector:
     app: odoo-prod

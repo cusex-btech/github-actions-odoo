@@ -16,6 +16,15 @@ spec:
       labels:
         app: odoo-stg
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - tambun-worker2
       initContainers:
         - name: set-vol-ownership
           image: busybox
