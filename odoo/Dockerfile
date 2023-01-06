@@ -93,6 +93,9 @@ USER odoo
 # Initialize database
 #RUN odoo -i base -d odoodb --without-demo=all --stop-after-init
 
+RUN touch /mnt/extra-addons/img-version.txt \
+    && echo "ini Odoo 16 v1.1.22" >> /mnt/extra-addons/img-version.txt
+
 # Run odoo server
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["odoo", "-i base", "--without-demo=all"]
