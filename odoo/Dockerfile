@@ -7,6 +7,10 @@ SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 # Generate locale C.UTF-8 for postgres and general locale data
 ENV LANG C.UTF-8
 
+RUN touch /img-version.txt \
+    && echo "ini Odoo 16 v1.1.22" >> /img-version.txt \
+    && cat /img-version.txt
+
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -92,10 +96,6 @@ USER odoo
 
 # Initialize database
 #RUN odoo -i base -d odoodb --without-demo=all --stop-after-init
-
-RUN touch /img-version.txt \
-    && echo "ini Odoo 16 v1.1.22" >> /img-version.txt \
-    && cat /img-version.txt
 
 # Run odoo server
 ENTRYPOINT ["/entrypoint.sh"]
