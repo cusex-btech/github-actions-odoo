@@ -12,7 +12,15 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/data/volume/odoo-stg-web"
+    path: "/data/volumes/odoo-stg-web"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - tambun-worker2
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -27,7 +35,15 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/data/volume/odoo-stg-addons"
+    path: "/data/volumes/odoo-stg-addons"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - tambun-worker2
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
