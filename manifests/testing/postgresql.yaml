@@ -1,0 +1,108 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config-test
+  namespace: odoo-test
+  labels:
+    app: postgres-test
+data:
+  POSTGRES_DB: odoodb
+  POSTGRES_USER: root
+  POSTGRES_PASSWORD: gladiators88
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgresql-data-test
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/data/volumes/postgresql-data-test"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - tambun-worker1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-data-test-claim
+  namespace: odoo-test
+spec:
+  volumeName: postgresql-data-test
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: odoo-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-test
+  template:
+    metadata:
+      labels:
+        app: postgres-test
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - tambun-worker1
+      containers:
+        - name: postgres
+          image: postgres:15.1-bullseye
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config-test
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: postgresql-data-test-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: odoo-test
+  labels:
+    app: postgres-test
+spec:
+  # clusterIP: 10.233.70.51
+  type: NodePort
+  selector:
+    app: postgres-test
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+
