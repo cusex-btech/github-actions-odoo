@@ -84,23 +84,23 @@ jobs:
         run: |
           # Staging Image
           echo Push image for Staging
-          docker tag ${{ steps.image-id.outputs.IMAGE_ID }} harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
-          docker push harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
+          docker tag ${{ steps.image-id.outputs.IMAGE_ID }} harbor.cusex.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
+          docker push harbor.cusex.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc
           # Production Image
           echo Push image for Production
-          docker tag harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}
-          docker push harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}
+          docker tag harbor.cusex.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc harbor.cusex.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}
+          docker push harbor.cusex.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}
       
       - name: Update Staging Manifest Yaml
         run: |
           cd manifests/staging
-          yq e -i '.spec.template.spec.containers[0].image="harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="harbor.cusex.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
           cat odoo.yaml
       
       - name: Update Production Manifest Yaml
         run: |
           cd manifests/production
-          yq e -i '.spec.template.spec.containers[0].image="harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
+          yq e -i '.spec.template.spec.containers[0].image="harbor.cusex.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
           cat odoo.yaml
       
       - name: Push Change Back to Github Staging Branch
@@ -137,7 +137,7 @@ jobs:
       - name: Scan Staging Odoo image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'harbor.febry.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc'
+          image-ref: 'harbor.cusex.local/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc'
           format: 'table'
           exit-code: '0'
           severity: 'MEDIUM,HIGH,CRITICAL'
