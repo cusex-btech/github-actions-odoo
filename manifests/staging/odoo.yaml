@@ -52,7 +52,7 @@ spec:
             - mountPath: /mnt/extra-addons
               name: odoo-addons
       imagePullSecrets:
-        - name: regcred
+        - name: regcred2
       volumes:
         - name: odoo-web
           persistentVolumeClaim:
