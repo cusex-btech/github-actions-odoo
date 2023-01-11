@@ -111,7 +111,7 @@ jobs:
 
       - name: Update Environment Variable
         run: |
-          cd .github/variables
+          cd helm
           echo VERSION=${{ steps.get-version.outputs.VERSION }} > version.env
 
       - name: Push Chart to Harbor
@@ -125,7 +125,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: 'helm','.github'
+          source_file: helm
           destination_repo: cusex-btech/github-actions-odoo
           destination_branch: staging
           user_email: majidqoba52@gmail.com

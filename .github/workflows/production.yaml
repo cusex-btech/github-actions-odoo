@@ -40,7 +40,7 @@ jobs:
       - name: Get Version
         uses: tw3lveparsecs/github-actions-setvars@latest
         with:
-          varFilePath: ./.github/variables/version.env
+          varFilePath: ./helm/version.env
 
       - name: ArgoCD Deploy to Production
         run: |
