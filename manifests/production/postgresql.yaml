@@ -10,30 +10,30 @@ data:
   POSTGRES_DB: odoodb
   POSTGRES_USER: root
   POSTGRES_PASSWORD: gladiators88
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: postgresql-data-prod
-  labels:
-    type: local
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: "/data/volumes/postgresql-data-prod"
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - tambun-worker1
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: postgresql-data-prod
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: manual
+#   capacity:
+#     storage: 5Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   persistentVolumeReclaimPolicy: Retain
+#   hostPath:
+#     path: "/data/volumes/postgresql-data-prod"
+#   nodeAffinity:
+#     required:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: kubernetes.io/hostname
+#           operator: In
+#           values:
+#           - tambun-worker1
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -41,10 +41,10 @@ metadata:
   name: postgresql-data-prod-claim
   namespace: odoo-prod
 spec:
-  volumeName: postgresql-data-prod
-  storageClassName: manual
+  # volumeName: postgresql-data-prod
+  storageClassName: nfs-cluster-client
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 5Gi
