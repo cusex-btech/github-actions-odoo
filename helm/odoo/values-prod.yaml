@@ -2,13 +2,10 @@ namespace: odoo-prod
 app:
   odoolabels: odoo-prod
   postgreslabels: postgres-prod
-
 container:
-  image: cx-harbor.btech.id/cusex/odoo:16-v1.2.9
+  image: cx-harbor.btech.id/cusex/odoo:16-v1.2.13
   pullPolicy: Always
-
 imagePullSecrets: regcred
-
 volume:
   # volumeNameweb: odoo-prod-web
   # volumeNameaddons: odoo-prod-addons
@@ -16,14 +13,10 @@ volume:
   claimNameweb: odoo-prod-web-claim
   claimNameaddons: odoo-prod-addons-claim
   claimNamepostgres: postgresql-data-prod-claim
-
 service:
   type: LoadBalancer
-
 ingress:
   ingressName: odoo-prod-ingress
   host: odoo.btech.local
-
 postgres:
   configName: postgres-config-prod
-
