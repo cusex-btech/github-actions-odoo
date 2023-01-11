@@ -1,49 +1,78 @@
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: odoo-prod-web
-  labels:
-    type: local
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/data/volumes/odoo-prod-web"
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - tambun-worker2
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: odoo-prod-addons
-  labels:
-    type: local
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/data/volumes/odoo-prod-addons"
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - tambun-worker2
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: odoo-prod-web
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: manual
+#   capacity:
+#     storage: 5Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/data/volumes/odoo-prod-web"
+#   nodeAffinity:
+#     required:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: kubernetes.io/hostname
+#           operator: In
+#           values:
+#           - tambun-worker2
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: odoo-prod-addons
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: manual
+#   capacity:
+#     storage: 5Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/data/volumes/odoo-prod-addons"
+#   nodeAffinity:
+#     required:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: kubernetes.io/hostname
+#           operator: In
+#           values:
+#           - tambun-worker2
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: odoo-prod-web-claim
+#   namespace: odoo-prod
+# spec:
+#   volumeName: odoo-prod-web
+#   storageClassName: manual
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 5Gi
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: odoo-prod-addons-claim
+#   namespace: odoo-prod
+# spec:
+#   volumeName: odoo-prod-addons
+#   storageClassName: manual
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 5Gi
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -51,10 +80,9 @@ metadata:
   name: odoo-prod-web-claim
   namespace: odoo-prod
 spec:
-  volumeName: odoo-prod-web
-  storageClassName: manual
+  storageClassName: nfs-cluster-client
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 5Gi
@@ -65,10 +93,9 @@ metadata:
   name: odoo-prod-addons-claim
   namespace: odoo-prod
 spec:
-  volumeName: odoo-prod-addons
-  storageClassName: manual
+  storageClassName: nfs-cluster-client
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 5Gi
