@@ -39,7 +39,7 @@ jobs:
       - name: Get Version
         id: get-version
         run: |
-          echo ::set-output name=VERSION::$(git tag --sort=-creatordate | head -n 1)
+          echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
 
       - name: ArgoCD Deploy to Production
         run: |
