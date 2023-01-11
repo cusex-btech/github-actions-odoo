@@ -1,0 +1,74 @@
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: {{ .Values.volume.volumeNameweb }}
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: manual
+#   capacity:
+#     storage: 5Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/data/volumes/odoo-stg-web"
+#   nodeAffinity:
+#     required:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: kubernetes.io/hostname
+#           operator: In
+#           values:
+#           - tambun-worker2
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: {{ .Values.volume.volumeNameaddons }}
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: manual
+#   capacity:
+#     storage: 5Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/data/volumes/odoo-stg-addons"
+#   nodeAffinity:
+#     required:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: kubernetes.io/hostname
+#           operator: In
+#           values:
+#           - tambun-worker2
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.volume.claimNameweb }}
+  namespace: {{ .Values.namespace }}
+spec:
+  # volumeName: {{ .Values.volume.volumeNameweb }}
+  storageClassName: nfs-cluster-client
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.volume.claimNameaddons }}
+  namespace: {{ .Values.namespace }}
+spec:
+  # volumeName: {{ .Values.volume.volumeNameaddons }}
+  storageClassName: nfs-cluster-client
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
