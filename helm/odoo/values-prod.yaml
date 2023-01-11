@@ -1,0 +1,29 @@
+namespace: odoo-prod
+app:
+  odoolabels: odoo-prod
+  postgreslabels: postgres-prod
+
+container:
+  image: cx-harbor.btech.id/cusex/odoo:16-v1.2.9
+  pullPolicy: Always
+
+imagePullSecrets: regcred
+
+volume:
+  # volumeNameweb: odoo-prod-web
+  # volumeNameaddons: odoo-prod-addons
+  # volumeNamepostgres: postgresql-data-prod
+  claimNameweb: odoo-prod-web-claim
+  claimNameaddons: odoo-prod-addons-claim
+  claimNamepostgres: postgresql-data-prod-claim
+
+service:
+  type: LoadBalancer
+
+ingress:
+  ingressName: odoo-prod-ingress
+  host: odoo.btech.local
+
+postgres:
+  configName: postgres-config-prod
+

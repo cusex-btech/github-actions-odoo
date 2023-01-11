@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "odoo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "odoo.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "odoo.labels" . | nindent 8 }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - tambun-worker2
+      initContainers:
+        - name: set-vol-ownership
+          image: busybox
+          command: ["/bin/chown", "-R", "101:101", "/var/lib/odoo", "/mnt/extra-addons"]
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          volumeMounts:
+            - mountPath: /var/lib/odoo
+              name: odoo-web
+            - mountPath: /mnt/extra-addons
+              name: odoo-addons
+      containers:
+        - name: odoo
+          image: {{ .Values.container.image }}
+          imagePullPolicy: {{ .Values.container.pullPolicy }}
+          ports:
+            - containerPort: 8069
+          envFrom:
+            - configMapRef:
+                name: odoo-config
+          volumeMounts:
+            - mountPath: /var/lib/odoo
+              name: odoo-web
+            - mountPath: /mnt/extra-addons
+              name: odoo-addons
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecrets }}
+      volumes:
+        - name: odoo-web
+          persistentVolumeClaim:
+            claimName: {{ .Values.volume.claimNameweb }}
+        - name: odoo-addons
+          persistentVolumeClaim:
+            claimName: {{ .Values.volume.claimNameaddons }}

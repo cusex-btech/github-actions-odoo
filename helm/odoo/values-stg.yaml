@@ -1,0 +1,29 @@
+namespace: odoo-stg
+app:
+  odoolabels: odoo-stg
+  postgreslabels: postgres-stg
+
+container:
+  image: cx-harbor.btech.id/cusex/odoo:16-v1.2.9-rc
+  pullPolicy: Always
+
+imagePullSecrets: regcred
+
+volume:
+  # volumeNameweb: odoo-stg-web
+  # volumeNameaddons: odoo-stg-addons
+  # volumeNamepostgres: postgresql-data-stg
+  claimNameweb: odoo-stg-web-claim
+  claimNameaddons: odoo-stg-addons-claim
+  claimNamepostgres: postgresql-data-stg-claim
+
+service:
+  type: LoadBalancer
+
+ingress:
+  ingressName: odoo-stg-ingress
+  host: odoo-stg.btech.local
+
+postgres:
+  configName: postgres-config-stg
+
