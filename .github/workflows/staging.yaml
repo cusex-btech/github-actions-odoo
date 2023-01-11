@@ -112,7 +112,7 @@ jobs:
       - name: Push Chart to Harbor
         run: |
           helm repo update
-          cd helm/odoo
+          cd helm
           helm cm-push --username ${{ secrets.HARBOR_USERNAME }} --password ${{ secrets.HARBOR_PASSWORD }} odoo/ cusex
 
       - name: Push Change Back to Github Staging Branch
