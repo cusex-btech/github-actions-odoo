@@ -38,14 +38,14 @@ jobs:
           fetch-depth: 0
 
       - name: Get Version
-        id: get-version
-        run: |
-          echo ::set-output name=VERSION::$(git describe --tags `git rev-list --tags --max-count=1`)
+        uses: tw3lveparsecs/github-actions-setvars@latest
+        with:
+          varFilePath: ./helm/version.env
 
       - name: ArgoCD Deploy to Production
         run: |
           argocd login --insecure  ${{ secrets.ARGOCD_SERVER }} --username  ${{ secrets.ARGOCD_USER }} --password  ${{ secrets.ARGOCD_PASS}}
-          argocd app create odoo-prod --project default --repo https://cx-harbor.btech.id/chartrepo/cusex --helm-chart odoo --revision ${{ steps.get-version.outputs.VERSION }} --values values-prod.yaml --dest-namespace odoo-prod --dest-server https://kubernetes.default.svc --upsert
+          argocd app create odoo-prod --project default --repo https://cx-harbor.btech.id/chartrepo/cusex --helm-chart odoo --revision ${{ env.VERSION }} --values values-prod.yaml --dest-namespace odoo-prod --dest-server https://kubernetes.default.svc --upsert
           argocd --grpc-web app sync odoo-prod --force
           argocd --grpc-web app wait odoo-prod --timeout 600
 
