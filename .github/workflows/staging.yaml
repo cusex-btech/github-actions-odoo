@@ -125,12 +125,12 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: manifests
+          source_file: 'helm','.github'
           destination_repo: cusex-btech/github-actions-odoo
           destination_branch: staging
           user_email: majidqoba52@gmail.com
           user_name: rjhaikal
-          commit_message: Update k8s manifest image version to ${{ steps.get-version.outputs.VERSION }}
+          commit_message: Update k8s helm image version to ${{ steps.get-version.outputs.VERSION }}
 
       - name: Telegram Notification
         if: ${{ failure() }}
