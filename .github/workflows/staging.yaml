@@ -109,6 +109,11 @@ jobs:
           yq e -i '.container.image="cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}"' values-prod.yaml
           cat values-prod.yaml
 
+      - name: Update Environment Variable
+        run: |
+          cd .github/variables
+          echo VERSION=${{ steps.get-version.outputs.VERSION }} > version.env
+
       - name: Push Chart to Harbor
         run: |
           helm repo update
