@@ -39,7 +39,7 @@ spec:
               name: odoo-addons
       containers:
         - name: odoo
-          image: harbor.febry.local/cusex/odoo:16-v1.2.1-rc
+          image: cx-harbor.btech.id/cusex/odoo:16-v1.2.7-rc
           imagePullPolicy: Always
           ports:
             - containerPort: 8069
