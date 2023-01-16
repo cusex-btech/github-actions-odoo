@@ -2,5 +2,5 @@ apiVersion: v2
 name: odoo
 description: A Helm chart for Odoo on Kubernetes by RJ
 type: application
-version: v1.2.17
-appVersion: "v1.2.17"
+version: v1.2.18
+appVersion: "v1.2.18"
