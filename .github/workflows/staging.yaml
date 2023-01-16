@@ -44,14 +44,14 @@ jobs:
       # - name: "Example show SonarQube Quality Gate Status value"
       #   run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
 
-      - name: Telegram Notification
-        if: ${{ failure() }}
-        uses: xinthink/action-telegram@v1.1
-        with:
-          botToken: ${{ secrets.TELE_BOT_TOKEN }}
-          chatId: ${{ secrets.TELE_CHAT_ID }}
-          jobStatus: ${{ job.status }}
-          skipSuccess: true
+      # - name: Telegram Notification
+      #   if: ${{ failure() }}
+      #   uses: xinthink/action-telegram@v1.1
+      #   with:
+      #     botToken: ${{ secrets.TELE_BOT_TOKEN }}
+      #     chatId: ${{ secrets.TELE_CHAT_ID }}
+      #     jobStatus: ${{ job.status }}
+      #     skipSuccess: true
 
   build-image:
     name: Build Docker Image & Push Chart to Harbor
@@ -132,14 +132,14 @@ jobs:
           user_name: rjhaikal
           commit_message: Update k8s helm image version to ${{ steps.get-version.outputs.VERSION }}
 
-      - name: Telegram Notification
-        if: ${{ failure() }}
-        uses: xinthink/action-telegram@v1.1
-        with:
-          botToken: ${{ secrets.TELE_BOT_TOKEN }}
-          chatId: ${{ secrets.TELE_CHAT_ID }}
-          jobStatus: ${{ job.status }}
-          skipSuccess: true
+      # - name: Telegram Notification
+      #   if: ${{ failure() }}
+      #   uses: xinthink/action-telegram@v1.1
+      #   with:
+      #     botToken: ${{ secrets.TELE_BOT_TOKEN }}
+      #     chatId: ${{ secrets.TELE_CHAT_ID }}
+      #     jobStatus: ${{ job.status }}
+      #     skipSuccess: true
 
   scan-image:
     name: Scan Image Vulnerability
@@ -159,14 +159,14 @@ jobs:
           exit-code: '0'
           severity: 'MEDIUM,HIGH,CRITICAL'
 
-      - name: Telegram Notification
-        if: ${{ failure() }}
-        uses: xinthink/action-telegram@v1.1
-        with:
-          botToken: ${{ secrets.TELE_BOT_TOKEN }}
-          chatId: ${{ secrets.TELE_CHAT_ID }}
-          jobStatus: ${{ job.status }}
-          skipSuccess: true
+      # - name: Telegram Notification
+      #   if: ${{ failure() }}
+      #   uses: xinthink/action-telegram@v1.1
+      #   with:
+      #     botToken: ${{ secrets.TELE_BOT_TOKEN }}
+      #     chatId: ${{ secrets.TELE_CHAT_ID }}
+      #     jobStatus: ${{ job.status }}
+      #     skipSuccess: true
 
   deploy-staging:
     name: Deploy Staging
@@ -187,14 +187,14 @@ jobs:
           argocd --grpc-web app sync odoo-staging --force
           argocd --grpc-web app wait odoo-staging --timeout 600
 
-      - name: Telegram Notification
-        if: ${{ failure() }}
-        uses: xinthink/action-telegram@v1.1
-        with:
-          botToken: ${{ secrets.TELE_BOT_TOKEN }}
-          chatId: ${{ secrets.TELE_CHAT_ID }}
-          jobStatus: ${{ job.status }}
-          skipSuccess: true
+      # - name: Telegram Notification
+      #   if: ${{ failure() }}
+      #   uses: xinthink/action-telegram@v1.1
+      #   with:
+      #     botToken: ${{ secrets.TELE_BOT_TOKEN }}
+      #     chatId: ${{ secrets.TELE_CHAT_ID }}
+      #     jobStatus: ${{ job.status }}
+      #     skipSuccess: true
 
   create-pr-to-prod:
     name: Create Pull Request to Production
@@ -219,11 +219,11 @@ jobs:
           pr_allow_empty: true 
           github_token: ${{ secrets.API_TOKEN_GITHUB }}
 
-      - name: Telegram Notification
-        if: cancelled() == false
-        uses: xinthink/action-telegram@v1.1
-        with:
-          botToken: ${{ secrets.TELE_BOT_TOKEN }}
-          chatId: ${{ secrets.TELE_CHAT_ID }}
-          jobStatus: ${{ job.status }}
-          skipSuccess: false
+      # - name: Telegram Notification
+      #   if: cancelled() == false
+      #   uses: xinthink/action-telegram@v1.1
+      #   with:
+      #     botToken: ${{ secrets.TELE_BOT_TOKEN }}
+      #     chatId: ${{ secrets.TELE_CHAT_ID }}
+      #     jobStatus: ${{ job.status }}
+      #     skipSuccess: false
