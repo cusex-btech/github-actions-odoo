@@ -182,6 +182,7 @@ jobs:
 
       - name: Flux Deploy to Staging
         run: |
+          sleep 10
           flux create source helm odoo-stg --namespace=odoo-stg --url=https://cx-harbor.btech.id/chartrepo/cusex --interval=10m
           flux create helmrelease odoo-stg --namespace=odoo-stg --source=HelmRepository/odoo-stg --release-name=odoo --chart=odoo --chart-version="${{ steps.get-version.outputs.VERSION }}" --values=./helm/odoo/values-stg.yaml
 
