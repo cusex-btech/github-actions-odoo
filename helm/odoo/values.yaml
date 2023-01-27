@@ -3,7 +3,7 @@ app:
   odoolabels: odoo-stg
   postgreslabels: postgres-stg
 container:
-  image: cx-harbor.btech.id/cusex/odoo:16-v2.2.3-rc
+  image: cx-harbor.btech.id/cusex/odoo:16-v2.2.5-rc
   pullPolicy: Always
 imagePullSecrets: regcred
 volume:
