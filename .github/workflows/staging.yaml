@@ -30,19 +30,19 @@ jobs:
             -Dsonar.verbose=true
             -Dsonar.qualitygate.wait=false
 
-      # - name: SonarQube Quality Gate check
-      #   id: sonarqube-quality-gate-check
-      #   uses: sonarsource/sonarqube-quality-gate-action@master
-      #   # Force to fail step after specific time.
-      #   timeout-minutes: 5
-      #   env:
-      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #    SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #OPTIONAL
+#       # - name: SonarQube Quality Gate check
+#       #   id: sonarqube-quality-gate-check
+#       #   uses: sonarsource/sonarqube-quality-gate-action@master
+#       #   # Force to fail step after specific time.
+#       #   timeout-minutes: 5
+#       #   env:
+#       #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#       #    SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #OPTIONAL
 
-      # # Optionally you can use the output from the Quality Gate in another step.
-      # # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
-      # - name: "Example show SonarQube Quality Gate Status value"
-      #   run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
+#       # # Optionally you can use the output from the Quality Gate in another step.
+#       # # The possible outputs of the `quality-gate-status` variable are `PASSED`, `WARN` or `FAILED`.
+#       # - name: "Example show SonarQube Quality Gate Status value"
+#       #   run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
 
       - name: Telegram Notification
         if: ${{ failure() }}
@@ -54,7 +54,7 @@ jobs:
           skipSuccess: true
 
   build-image:
-    name: Build Docker Image & Push Chart to Harbor
+    name: Build Docker image and push to repositories
     runs-on: self-hosted
     needs: scan-code
     steps:
@@ -90,47 +90,30 @@ jobs:
           echo Push image for Production
           docker tag cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}
           docker push cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}
-
-      - name: Update Staging Helm Chart Values
+      
+      - name: Update Staging Manifest Yaml
         run: |
-          cd helm/odoo
-          # Update Helm Chart Version
-          yq e -i '.version="${{ steps.get-version.outputs.VERSION }}"' Chart.yaml
-          yq e -i '.appVersion="${{ steps.get-version.outputs.VERSION }}"' Chart.yaml
-          cat Chart.yaml
-
-          # Update Staging Values
-          yq e -i '.container.image="cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc"' values.yaml
-          cat values.yaml
-          yq e -i '.container.image="cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc"' values-stg.yaml
-          cat values-stg.yaml
-
-          # Update Production Values
-          yq e -i '.container.image="cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}"' values-prod.yaml
-          cat values-prod.yaml
-
-      - name: Update Environment Variable
+          cd manifests/staging
+          yq e -i '.spec.template.spec.containers[0].image="cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}-rc"' odoo.yaml
+          cat odoo.yaml
+      
+      - name: Update Production Manifest Yaml
         run: |
-          cd helm
-          echo VERSION=${{ steps.get-version.outputs.VERSION }} > version.env
-
-      - name: Push Chart to Harbor
-        run: |
-          helm repo update
-          cd helm
-          helm cm-push --username ${{ secrets.HARBOR_USERNAME }} --password ${{ secrets.HARBOR_PASSWORD }} odoo/ cusex
-
+          cd manifests/production
+          yq e -i '.spec.template.spec.containers[0].image="cx-harbor.btech.id/cusex/odoo:16-${{ steps.get-version.outputs.VERSION }}"' odoo.yaml
+          cat odoo.yaml
+      
       - name: Push Change Back to Github Staging Branch
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source_file: helm
+          source_file: manifests
           destination_repo: cusex-btech/github-actions-odoo
           destination_branch: staging
           user_email: majidqoba52@gmail.com
           user_name: rjhaikal
-          commit_message: Update k8s helm image version to ${{ steps.get-version.outputs.VERSION }}
+          commit_message: Update k8s manifest image version to ${{ steps.get-version.outputs.VERSION }}
 
       - name: Telegram Notification
         if: ${{ failure() }}
@@ -175,16 +158,10 @@ jobs:
     environment:
       name: Staging
     steps:
-      - name: get version
-        id: get-version
-        run: |
-          echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
-
       - name: Flux Deploy to Staging
         run: |
-          sleep 10
-          flux create source helm odoo-stg --namespace=odoo-stg --url=https://cx-harbor.btech.id/chartrepo/cusex --interval=10m
-          flux create helmrelease odoo-stg --namespace=odoo-stg --source=HelmRepository/odoo-stg --release-name=odoo --chart=odoo --chart-version="${{ steps.get-version.outputs.VERSION }}" --values=./helm/odoo/values-stg.yaml
+          flux create source git odoo-stg --namespace=odoo-stg --url=https://github.com/cusex-btech/github-actions-odoo.git --branch=staging
+          flux create kustomization odoo-stg --prune=true --namespace=odoo-stg --source=GitRepository/odoo-stg --path="./manifests/staging"
 
       - name: Telegram Notification
         if: ${{ failure() }}
