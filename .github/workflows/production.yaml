@@ -35,17 +35,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: production
-          fetch-depth: 0
-
-      - name: Get Version
-        uses: tw3lveparsecs/github-actions-setvars@latest
-        with:
-          envFilePath: ./helm/version.env
 
       - name: Flux Deploy to Production
         run: |
-          flux create source helm odoo-prod --namespace=odoo-prod --url=https://cx-harbor.btech.id/chartrepo/cusex --interval=10m
-          flux create helmrelease odoo-prod --namespace=odoo-prod --source=HelmRepository/odoo-prod --release-name=odoo --chart=odoo --chart-version="${{ env.VERSION }}" --values=./helm/odoo/values-prod.yaml
+          flux create source git odoo-prod --namespace=odoo-prod --url=https://github.com/cusex-btech/github-actions-odoo.git --branch=production
+          flux create kustomization odoo-prod --prune=true --namespace=odoo-prod --source=GitRepository/odoo-prod --path="./manifests/production"
 
       - name: Telegram Notification
         if: cancelled() == false
